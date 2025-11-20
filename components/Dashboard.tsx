@@ -1,6 +1,6 @@
 import React from 'react';
 import { GlassCard } from './GlassCard';
-import { ArrowUpRight, ArrowDownRight, IndianRupee, Activity, PieChart as PieIcon, Users } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, IndianRupee, Activity, PieChart as PieIcon, Users, Wifi } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnimatedWrapper } from './AnimatedWrapper';
 import { motion } from 'framer-motion';
@@ -39,13 +39,16 @@ export const Dashboard: React.FC = () => {
             <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-md">Good morning, Advisor</h1>
             <p className="text-white/60">Market update: NIFTY 50 is up by 0.8% today.</p>
           </div>
-          <GlassCard className="px-4 py-2 flex items-center gap-2 bg-emerald-500/20 border-emerald-500/30">
-            <motion.div 
-              animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="w-2 h-2 rounded-full bg-emerald-400" 
-            />
-            <span className="text-sm font-medium text-emerald-100">System Online • Sync Active</span>
+          <GlassCard className="px-4 py-2 flex items-center gap-3 bg-emerald-500/20 border-emerald-500/30 min-w-fit">
+            <div className="relative flex items-center justify-center w-5 h-5">
+               <motion.div 
+                  animate={{ scale: [1, 3], opacity: [0.8, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute w-1.5 h-1.5 rounded-full bg-emerald-400 blur-[1px]" 
+               />
+               <Wifi size={16} className="text-emerald-400 relative z-10" />
+            </div>
+            <span className="text-sm font-medium text-emerald-100 whitespace-nowrap">System Online • Sync Active</span>
           </GlassCard>
         </motion.div>
 
