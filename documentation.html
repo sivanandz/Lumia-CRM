@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Wealth CRM - Developer Wiki & Comprehensive Guide</title>
+    <style>
+        :root {
+            --primary: #10b981; /* Emerald 500 */
+            --secondary: #3b82f6; /* Blue 500 */
+            --bg: #0f172a;
+            --text: #e2e8f0;
+            --surface: #1e293b;
+            --border: #334155;
+            --code-bg: #020617;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        nav {
+            width: 280px;
+            background-color: var(--code-bg);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+            flex-shrink: 0;
+        }
+
+        nav h3 {
+            color: var(--primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 0.4rem 0;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #fff;
+            padding-left: 5px;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 3rem 4rem;
+            max-width: 1200px;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; color: transparent; }
+        h2 { font-size: 1.8rem; margin-top: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: #fff; }
+        h3 { font-size: 1.4rem; margin-top: 2rem; color: #e2e8f0; }
+        h4 { font-size: 1.1rem; margin-top: 1.5rem; color: #cbd5e1; font-weight: 600; }
+
+        p, li { color: #cbd5e1; }
+        
+        code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            color: #fca5a5;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #e2e8f0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-mock { background: #7f1d1d; color: #fca5a5; }
+        .badge-live { background: #064e3b; color: #6ee7b7; }
+        .badge-ai { background: #312e81; color: #c7d2fe; border: 1px solid #6366f1; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th { background-color: var(--surface); }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+        
+        .warning-box {
+            background-color: rgba(234, 179, 8, 0.1);
+            border-left: 4px solid #eab308;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        footer {
+            margin-top: 5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        @media (max-width: 1024px) {
+            body { flex-direction: column; }
+            nav { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border); }
+            main { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div style="padding-left: 0.5rem; font-weight: bold; font-size: 1.2rem; color: #fff; margin-bottom: 1rem;">
+        Lumina Wiki
+    </div>
+    <h3>Overview</h3>
+    <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#tech-stack">Tech Stack & Architecture</a></li>
+        <li><a href="#ui-design">UI Design System</a></li>
+    </ul>
+
+    <h3>Core Features</h3>
+    <ul>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#client-management">Client Management</a></li>
+        <li><a href="#mutual-funds">Mutual Funds (AI)</a></li>
+        <li><a href="#insurance">Insurance (AI)</a></li>
+        <li><a href="#calendar">Calendar & Tasks</a></li>
+        <li><a href="#drive">Secure Drive</a></li>
+    </ul>
+
+    <h3>AI Intelligence</h3>
+    <ul>
+        <li><a href="#ai-advisor">AI Advisor Module</a></li>
+        <li><a href="#gemini-live">Gemini Live (Voice)</a></li>
+        <li><a href="#grounding">Search & Maps Grounding</a></li>
+        <li><a href="#thinking-mode">Thinking Mode</a></li>
+    </ul>
+
+    <h3>Development</h3>
+    <ul>
+        <li><a href="#data-structure">Data Architecture (Mock vs Real)</a></li>
+        <li><a href="#roadmap">Roadmap & Missing Features</a></li>
+    </ul>
+</nav>
+
+<main>
+    <header>
+        <h1>Lumina Wealth CRM</h1>
+        <p>Comprehensive documentation for the Next-Gen AI Financial Advisor Platform.</p>
+        <div style="margin-top: 1rem;">
+            <span class="badge badge-live">v1.0-alpha</span>
+            <span class="badge badge-ai">Gemini 2.5 & 3.0 Integrated</span>
+        </div>
+    </header>
+
+    <section id="introduction">
+        <h2>1. Introduction</h2>
+        <p><strong>Lumina Wealth CRM</strong> is a specialized Customer Relationship Management tool designed for High Net-Worth Individual (HNI) Financial Advisors in India. Unlike generic CRMs, Lumina is built with a "Liquid Glass" aesthetic and is deeply integrated with Google's Gemini AI ecosystem to perform complex financial reasoning, real-time market research, and voice-based interactions.</p>
+        <p>The application serves as a frontend prototype with a fully functional "Brain" (AI) but relies on in-memory state and mock data for persistence in this version.</p>
+    </section>
+
+    <section id="tech-stack">
+        <h2>2. Tech Stack & Architecture</h2>
+        <div class="feature-grid">
+            <div class="card">
+                <h4>Frontend Core</h4>
+                <ul>
+                    <li><strong>React 19:</strong> Component-based architecture.</li>
+                    <li><strong>TypeScript:</strong> Strict type safety (Interfaces defined in <code>types.ts</code>).</li>
+                    <li><strong>Vite/Bundler:</strong> (Implied environment).</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h4>Styling & Animation</h4>
+                <ul>
+                    <li><strong>Tailwind CSS:</strong> Utility-first styling.</li>
+                    <li><strong>Framer Motion:</strong> Complex layout transitions, shared element animations, and micro-interactions.</li>
+                    <li><strong>Lucide React:</strong> Iconography.</li>
+                    <li><strong>Recharts:</strong> Financial data visualization.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h4>Artificial Intelligence</h4>
+                <ul>
+                    <li><strong>@google/genai SDK:</strong> Direct integration.</li>
+                    <li><strong>Gemini 3.0 Pro Preview:</strong> For "Thinking" and complex reasoning.</li>
+                    <li><strong>Gemini 2.5 Flash:</strong> For "Search Grounding" and "Maps".</li>
+                    <li><strong>Gemini Live API:</strong> For real-time WebSocket audio streaming.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="ui-design">
+        <h2>3. UI Design System</h2>
+        <p>Lumina uses a distinct <strong>"Liquid Glass"</strong> design language.</p>
+        <ul>
+            <li><strong>Background:</strong> A complex, multi-layered radial gradient (`#020405` base) that creates depth.</li>
+            <li><strong>GlassCard Component:</strong> The core building block (<code>components/GlassCard.tsx</code>). It uses <code>backdrop-blur-xl</code>, white transparency borders, and an internal "shine" layer using <code>z-index</code> isolation to create a premium feel.</li>
+            <li><strong>Animations:</strong> 
+                <ul>
+                    <li><em>Staggered Entrance:</em> Dashboard cards and list items slide in sequentially.</li>
+                    <li><em>Hover/Tap:</em> Buttons and cards scale slightly (`scale: 1.02`).</li>
+                    <li><em>Layout Transitions:</em> `AnimatePresence` handles page switching (`mode="wait"`).</li>
+                </ul>
+            </li>
+            <li><strong>Custom Components:</strong>
+                <ul>
+                    <li><code>GlassDropdown.tsx</code>: Replaces native OS selects with a themed, animated dropdown.</li>
+                    <li><code>StatusBadge</code> (Internal): Uses pulsing animations for "Active" status and rotating borders for "Onboarding".</li>
+                </ul>
+            </li>
+        </ul>
+    </section>
+
+    <section id="dashboard">
+        <h2>4. Dashboard</h2>
+        <p><strong>File:</strong> <code>components/Dashboard.tsx</code></p>
+        <p>The command center for the advisor.</p>
+        <ul>
+            <li><strong>KPI Cards:</strong> Displays Total AUM, Active Clients, and Monthly SIP Flow. Includes comparison metrics.</li>
+            <li><strong>Portfolio Growth Chart:</strong> Uses `Recharts` AreaChart. Includes a time-range filter (6m, 1y, YTD). <span class="badge badge-mock">Mock Data</span></li>
+            <li><strong>Upcoming Meetings:</strong> A list of scheduled interactions.</li>
+            <li><strong>System Status:</strong> An animated "Wifi" icon indicating sync status with the backend/AI.</li>
+        </ul>
+    </section>
+
+    <section id="client-management">
+        <h2>5. Client Management</h2>
+        <p><strong>File:</strong> <code>components/ClientsView.tsx</code></p>
+        <p>A split-pane view (Master-Detail) for managing relationships.</p>
+        
+        <h3>Features:</h3>
+        <ul>
+            <li><strong>Client List:</strong> 
+                <ul>
+                    <li>Compact row layout (Avatar, Name, Location, Status).</li>
+                    <li><strong>Search:</strong> Fuzzy filtering by name, email, or tags.</li>
+                    <li><strong>Filtering:</strong> GlassDropdown to filter by Status, AUM (High Value), Risk Profile, or Activity.</li>
+                    <li><strong>Pagination:</strong> Infinite scroll (simulated via <code>overflow-y-auto</code>).</li>
+                </ul>
+            </li>
+            <li><strong>Detail View:</strong>
+                <ul>
+                    <li><strong>Header:</strong> Large avatar, quick actions (Log Meeting). Scrolls <em>away</em> to maximize content space.</li>
+                    <li><strong>Metrics:</strong> AUM, Risk Profile, Status (Interactive toggle).</li>
+                    <li><strong>Timeline:</strong> A vertical line connecting history items (Meetings, Calls, System updates).</li>
+                    <li><strong>Tags:</strong> Visual pills for categorization (e.g., "HNI", "Golfer").</li>
+                </ul>
+            </li>
+            <li><strong>Add Client:</strong> Uses <code>ClientForm.tsx</code> modal with multi-step data entry and tag management.</li>
+        </ul>
+    </section>
+
+    <section id="mutual-funds">
+        <h2>6. Mutual Funds (AI Integrated)</h2>
+        <p><strong>File:</strong> <code>components/FundsView.tsx</code></p>
+        <p>Displays a list of tracked funds. The standout feature is the <strong>Gemini Fund Insight</strong> panel.</p>
+        <div class="card">
+            <h4><span class="badge badge-ai">AI Feature: Fund Analysis</span></h4>
+            <p>Clicking "Analyze Fund" triggers a call to <code>gemini-2.5-flash</code> using the <strong>Google Search Tool</strong>.</p>
+            <pre><code>// Prompt Strategy
+"Analyze the mutual fund {name}. Provide performance review vs NIFTY 50, risk factors, and investor suitability using real-time data."</code></pre>
+            <p>This fetches <em>live</em> market data, bypassing the CRM's mock database.</p>
+        </div>
+    </section>
+
+    <section id="insurance">
+        <h2>7. Insurance (AI Integrated)</h2>
+        <p><strong>File:</strong> <code>components/InsuranceView.tsx</code></p>
+        <p>Similar layout to Funds, but optimized for policy details (Premium, Cover, Features).</p>
+        <div class="card">
+            <h4><span class="badge badge-ai">AI Feature: Policy Decoder</span></h4>
+            <p>Uses <strong>Gemini 3.0 Pro (Thinking Mode)</strong> to break down complex policy terms.</p>
+            <p><strong>Goal:</strong> "Plain English" explanation, hidden exclusions check, and premium-to-cover ratio analysis.</p>
+        </div>
+    </section>
+
+    <section id="calendar">
+        <h2>8. Calendar & Tasks</h2>
+        <p><strong>File:</strong> <code>components/CalendarView.tsx</code> & <code>App.tsx</code></p>
+        <p>A unified view for time management.</p>
+        <ul>
+            <li><strong>Schedule:</strong> A timeline view of the day's events.</li>
+            <li><strong>Calendar Widget:</strong> A visual month grid (visual only).</li>
+            <li><strong>Task Manager:</strong>
+                <ul>
+                    <li>State lifted to `App.tsx` to allow global access via Quick Dock.</li>
+                    <li>"Add Task" button is persistent at the bottom.</li>
+                    <li>Tasks support "Done" toggling with strikethrough animation.</li>
+                </ul>
+            </li>
+        </ul>
+    </section>
+
+    <section id="drive">
+        <h2>9. Secure Drive</h2>
+        <p>A grid view of documents. Currently a visual representation of a Google Drive sync. Supports file type icons (Folder, PDF, Sheet).</p>
+    </section>
+
+    <section id="ai-advisor">
+        <h2>10. AI Advisor Module</h2>
+        <p><strong>File:</strong> <code>components/AIChat.tsx</code></p>
+        <p>The "Brain" of the application. This is not just a chatbot; it is a multi-modal agent.</p>
+
+        <h3>Modes:</h3>
+        <table class="feature-table">
+            <thead>
+                <tr>
+                    <th>Mode</th>
+                    <th>Model</th>
+                    <th>Config</th>
+                    <th>Use Case</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Deep Think</strong></td>
+                    <td><code>gemini-3-pro-preview</code></td>
+                    <td><code>thinkingBudget: 32768</code></td>
+                    <td>Complex portfolio strategy, rebalancing logic, estate planning.</td>
+                </tr>
+                <tr>
+                    <td><strong>Research</strong></td>
+                    <td><code>gemini-2.5-flash</code></td>
+                    <td><code>tools: [{googleSearch: {}}]</code></td>
+                    <td>Live market news, tax regulation updates, competitor analysis.</td>
+                </tr>
+                <tr>
+                    <td><strong>Locate</strong></td>
+                    <td><code>gemini-2.5-flash</code></td>
+                    <td><code>tools: [{googleMaps: {}}]</code></td>
+                    <td>Finding nearby branches, notary services, or client meeting spots. Uses <code>navigator.geolocation</code>.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>UI Features:</h3>
+        <ul>
+            <li><strong>Grounding Sources:</strong> Automatically renders citations (URLs) from Search or Maps metadata below the chat bubble.</li>
+            <li><strong>Markdown Support:</strong> Renders bolding, lists, and formatting from AI response.</li>
+        </ul>
+    </section>
+
+    <section id="gemini-live">
+        <h2>11. Gemini Live (Voice)</h2>
+        <p><strong>File:</strong> <code>components/LiveVoice.tsx</code></p>
+        <p>A real-time, low-latency voice conversational interface.</p>
+        <ul>
+            <li><strong>Protocol:</strong> WebSocket connection via <code>ai.live.connect</code>.</li>
+            <li><strong>Audio Stack:</strong>
+                <ul>
+                    <li><strong>Input:</strong> <code>AudioContext</code> (16kHz) -> PCM conversion -> Base64 -> Stream to API.</li>
+                    <li><strong>Output:</strong> Base64 PCM (24kHz) from API -> Float32Array -> AudioBuffer -> Playback.</li>
+                </ul>
+            </li>
+            <li><strong>Visualizer:</strong> A pulsing, rotating orb that reacts to "Talking" and "Listening" states using Framer Motion.</li>
+            <li><strong>Model:</strong> <code>gemini-2.5-flash-native-audio-preview-09-2025</code>.</li>
+        </ul>
+    </section>
+
+    <section id="data-structure">
+        <h2>12. Data Architecture (Mock vs Real)</h2>
+        <div class="warning-box">
+            <strong>Current Status:</strong> The application runs on Client-Side State. Reloading the page resets data.
+        </div>
+        
+        <table>
+            <tr>
+                <th>Entity</th>
+                <th>Current Implementation</th>
+                <th>Production Requirement</th>
+            </tr>
+            <tr>
+                <td>Clients</td>
+                <td><code>MOCK_CLIENTS</code> (App.tsx state)</td>
+                <td>PostgreSQL / Supabase (Clients Table)</td>
+            </tr>
+            <tr>
+                <td>Funds</td>
+                <td><code>MOCK_FUNDS</code> (Static Const)</td>
+                <td>Mutual Fund API (NAV, Returns)</td>
+            </tr>
+            <tr>
+                <td>Tasks</td>
+                <td><code>tasks</code> State (Lifted to App.tsx)</td>
+                <td>Database + Google Tasks API Sync</td>
+            </tr>
+            <tr>
+                <td>Files</td>
+                <td><code>MOCK_FILES</code> (Static)</td>
+                <td>Google Drive API (OAuth Scope)</td>
+            </tr>
+        </table>
+    </section>
+
+    <section id="roadmap">
+        <h2>13. Roadmap & Missing Features</h2>
+        <p>To take this from a prototype to a production CRM, the following must be built:</p>
+
+        <h4>Phase 1: Persistence</h4>
+        <ul>
+            <li>Implement Supabase or Firebase for user authentication and database.</li>
+            <li>Replace <code>MOCK_CLIENTS</code> with a <code>useClients</code> hook fetching from DB.</li>
+        </ul>
+
+        <h4>Phase 2: Real Integrations</h4>
+        <ul>
+            <li><strong>Google OAuth:</strong> Allow users to sign in with Google to enable real Calendar and Drive access.</li>
+            <li><strong>Email Integration:</strong> clicking an email address should actually log the email in the history via Gmail API.</li>
+        </ul>
+
+        <h4>Phase 3: AI Enhancements</h4>
+        <ul>
+            <li><strong>RAG (Retrieval Augmented Generation):</strong> Allow the AI Advisor to "read" the PDF files in the Drive tab (e.g., "Summarize the policy document I just uploaded").</li>
+            <li><strong>Function Calling:</strong> Allow the AI to perform actions, like "Schedule a meeting with Rahul" (actually creating the Calendar event).</li>
+        </ul>
+
+        <h4>Phase 4: Mobile Optimization</h4>
+        <ul>
+            <li>While responsive, the "Split View" layouts need a "Stack View" logic for mobile devices to avoid cramping.</li>
+        </ul>
+    </section>
+
+    <footer>
+        <p>Lumina Wealth CRM Documentation | Generated by Google GenAI</p>
+    </footer>
+</main>
+
+</body>
+</html>
