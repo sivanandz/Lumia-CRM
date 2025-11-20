@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClientsView } from './components/ClientsView';
@@ -7,11 +7,11 @@ import { AIChat } from './components/AIChat';
 import { ClientForm } from './components/ClientForm';
 import { GlassCard } from './components/GlassCard';
 import { Tab, Client } from './types';
-import { Search, Bell, Folder, FileText, Users, Calendar, UploadCloud, Sparkles } from 'lucide-react';
+import { Search, Bell, Folder, FileText, Users, Calendar, UploadCloud, Sparkles, TrendingUp, ArrowRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedWrapper } from './components/AnimatedWrapper';
 
-// Moved mock data here to be shared state
+// Shared Data
 const MOCK_CLIENTS: Client[] = [
   {
     id: '1',
@@ -87,15 +87,75 @@ const MOCK_CLIENTS: Client[] = [
   }
 ];
 
+const MOCK_FILES = [
+  { id: 'f1', name: 'Client_KYC_2024', type: 'folder', items: '24 files' },
+  { id: 'f2', name: 'Policy_Documents', type: 'folder', items: '156 files' },
+  { id: 'f3', name: 'Tax_Reports_FY23', type: 'pdf', items: '2.4 MB' },
+  { id: 'f4', name: 'Portfolio_Nav_Data', type: 'sheet', items: 'Synced 2m ago' },
+];
+
+const MOCK_FUNDS = [
+  { id: 'mf1', name: 'HDFC Mid-Cap Opportunities', nav: 145.2, category: 'Equity' },
+  { id: 'mf2', name: 'SBI Bluechip Fund', nav: 88.5, category: 'Equity' },
+  { id: 'mf3', name: 'ICICI Prudential Balanced', nav: 42.1, category: 'Hybrid' },
+  { id: 'mf4', name: 'Axis Small Cap Fund', nav: 92.3, category: 'Equity' },
+  { id: 'mf5', name: 'Parag Parikh Flexi Cap', nav: 65.4, category: 'Equity' },
+];
+
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.DASHBOARD);
   const [clients, setClients] = useState<Client[]>(MOCK_CLIENTS);
   const [isClientFormOpen, setIsClientFormOpen] = useState(false);
+  
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery) return { clients: [], funds: [], files: [] };
+    const lowerQuery = searchQuery.toLowerCase();
+    
+    return {
+      clients: clients.filter(c => 
+        c.name.toLowerCase().includes(lowerQuery) || 
+        c.email.toLowerCase().includes(lowerQuery) ||
+        c.tags?.some(t => t.toLowerCase().includes(lowerQuery))
+      ),
+      funds: MOCK_FUNDS.filter(f => 
+        f.name.toLowerCase().includes(lowerQuery) ||
+        f.category.toLowerCase().includes(lowerQuery)
+      ),
+      files: MOCK_FILES.filter(f => 
+        f.name.toLowerCase().replace(/_/g, ' ').includes(lowerQuery)
+      )
+    };
+  }, [searchQuery, clients]);
+
+  const hasResults = searchResults.clients.length > 0 || searchResults.funds.length > 0 || searchResults.files.length > 0;
 
   const handleNewClient = (newClient: Client) => {
     setClients(prev => [newClient, ...prev]);
-    // Optional: Switch to clients tab to see the new client
     setActiveTab(Tab.CLIENTS); 
+  };
+
+  const handleSearchResultClick = (type: 'client' | 'fund' | 'file', id: string) => {
+    setSearchQuery('');
+    setIsSearchFocused(false);
+    if (type === 'client') setActiveTab(Tab.CLIENTS);
+    if (type === 'fund') setActiveTab(Tab.FUNDS);
+    if (type === 'file') setActiveTab(Tab.DRIVE);
   };
 
   const renderContent = () => {
@@ -128,13 +188,8 @@ function App() {
               </GlassCard>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { name: 'Client_KYC_2024', type: 'folder', items: '24 files' },
-                { name: 'Policy_Documents', type: 'folder', items: '156 files' },
-                { name: 'Tax_Reports_FY23', type: 'pdf', items: '2.4 MB' },
-                { name: 'Portfolio_Nav_Data', type: 'sheet', items: 'Synced 2m ago' },
-              ].map((file, i) => (
-                <GlassCard key={i} hoverEffect className="p-4 flex flex-col items-center justify-center gap-3 aspect-square cursor-pointer">
+              {MOCK_FILES.map((file) => (
+                <GlassCard key={file.id} hoverEffect className="p-4 flex flex-col items-center justify-center gap-3 aspect-square cursor-pointer">
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${file.type === 'folder' ? 'bg-amber-400/20 text-amber-300' : 'bg-blue-400/20 text-blue-300'}`}>
                     {file.type === 'folder' ? <Folder size={32} fill="currentColor" className="opacity-50" /> : <FileText size={32} />}
                   </div>
@@ -183,13 +238,114 @@ function App() {
         <div className="h-20 px-8 flex items-center justify-between shrink-0">
           
           {/* Search Bar */}
-          <div className="relative w-96 hidden md:block">
+          <div ref={searchRef} className="relative w-96 hidden md:block z-50">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
             <input 
               type="text" 
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSearchFocused(true);
+              }}
+              onFocus={() => setIsSearchFocused(true)}
               placeholder="Search clients, funds, or documents..." 
-              className="w-full h-12 bg-white/5 border border-white/10 rounded-full pl-12 pr-4 text-white placeholder-white/30 focus:bg-white/10 focus:border-white/30 focus:outline-none transition-all backdrop-blur-md"
+              className="w-full h-12 bg-white/5 border border-white/10 rounded-full pl-12 pr-10 text-white placeholder-white/30 focus:bg-white/10 focus:border-white/30 focus:outline-none transition-all backdrop-blur-md"
             />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+              >
+                <X size={14} />
+              </button>
+            )}
+
+            {/* Search Results Dropdown */}
+            <AnimatePresence>
+              {isSearchFocused && searchQuery && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-14 left-0 w-full bg-black/60 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[60vh] overflow-y-auto custom-scrollbar"
+                >
+                  {!hasResults ? (
+                    <div className="p-8 text-center text-white/40 text-sm">
+                      No results found for "{searchQuery}"
+                    </div>
+                  ) : (
+                    <div className="p-2">
+                      {/* Clients Section */}
+                      {searchResults.clients.length > 0 && (
+                        <div className="mb-2">
+                          <h4 className="px-3 py-2 text-xs font-semibold text-white/40 uppercase tracking-wider">Clients</h4>
+                          {searchResults.clients.map(client => (
+                            <div 
+                              key={client.id}
+                              onClick={() => handleSearchResultClick('client', client.id)}
+                              className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 cursor-pointer group transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center text-xs text-white font-medium border border-white/10">
+                                {client.avatar}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white group-hover:text-emerald-300 transition-colors truncate">{client.name}</p>
+                                <p className="text-xs text-white/40 truncate">{client.email}</p>
+                              </div>
+                              <ArrowRight size={14} className="text-white/20 group-hover:text-white transition-colors" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Funds Section */}
+                      {searchResults.funds.length > 0 && (
+                        <div className="mb-2">
+                          <h4 className="px-3 py-2 text-xs font-semibold text-white/40 uppercase tracking-wider">Mutual Funds</h4>
+                          {searchResults.funds.map(fund => (
+                            <div 
+                              key={fund.id}
+                              onClick={() => handleSearchResultClick('fund', fund.id)}
+                              className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 cursor-pointer group transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                                <TrendingUp size={14} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white group-hover:text-purple-300 transition-colors truncate">{fund.name}</p>
+                                <p className="text-xs text-white/40">{fund.category} • NAV: {fund.nav}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Files Section */}
+                      {searchResults.files.length > 0 && (
+                        <div>
+                          <h4 className="px-3 py-2 text-xs font-semibold text-white/40 uppercase tracking-wider">Drive Files</h4>
+                          {searchResults.files.map(file => (
+                            <div 
+                              key={file.id}
+                              onClick={() => handleSearchResultClick('file', file.id)}
+                              className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 cursor-pointer group transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                                {file.type === 'folder' ? <Folder size={14} fill="currentColor" className="opacity-70" /> : <FileText size={14} />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white group-hover:text-blue-300 transition-colors truncate">{file.name}</p>
+                                <p className="text-xs text-white/40">{file.items}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Right Actions */}

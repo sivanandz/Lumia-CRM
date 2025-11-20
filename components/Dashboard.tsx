@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { GlassCard } from './GlassCard';
 import { ArrowUpRight, ArrowDownRight, IndianRupee, Activity, PieChart as PieIcon, Users, Wifi } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnimatedWrapper } from './AnimatedWrapper';
 import { motion } from 'framer-motion';
+import { GlassDropdown } from './GlassDropdown';
 
 const data = [
   { name: 'Jan', value: 4000 },
@@ -30,6 +31,13 @@ const itemVariants = {
 };
 
 export const Dashboard: React.FC = () => {
+  const [timeRange, setTimeRange] = useState('6m');
+  const timeRangeOptions = [
+    { label: 'Last 6 Months', value: '6m' },
+    { label: 'Last Year', value: '1y' },
+    { label: 'YTD', value: 'ytd' }
+  ];
+
   return (
     <AnimatedWrapper className="space-y-6">
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
@@ -42,8 +50,8 @@ export const Dashboard: React.FC = () => {
           <GlassCard className="px-4 py-2 flex items-center gap-3 bg-emerald-500/20 border-emerald-500/30 min-w-fit">
             <div className="relative flex items-center justify-center w-5 h-5">
                <motion.div 
-                  animate={{ scale: [1, 3], opacity: [0.8, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                  animate={{ scale: [1, 2.5], opacity: [0.6, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   className="absolute w-1.5 h-1.5 rounded-full bg-emerald-400 blur-[1px]" 
                />
                <Wifi size={16} className="text-emerald-400 relative z-10" />
@@ -107,10 +115,13 @@ export const Dashboard: React.FC = () => {
             <GlassCard className="p-6 flex flex-col h-full">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold text-white">Portfolio Growth</h3>
-                <select className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-sm text-white/80 outline-none">
-                  <option value="6m" className="bg-gray-900">Last 6 Months</option>
-                  <option value="1y" className="bg-gray-900">Last Year</option>
-                </select>
+                <div className="w-40">
+                  <GlassDropdown 
+                    options={timeRangeOptions}
+                    value={timeRange}
+                    onChange={setTimeRange}
+                  />
+                </div>
               </div>
               <div className="flex-1 w-full min-h-0">
                 <ResponsiveContainer width="100%" height="100%">

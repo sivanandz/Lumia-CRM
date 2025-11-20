@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { GlassCard } from './GlassCard';
 import { Client } from '../types';
 import { AnimatedWrapper } from './AnimatedWrapper';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GlassDropdown } from './GlassDropdown';
 import { 
   Search, 
   Phone, 
@@ -18,8 +18,7 @@ import {
   Clock,
   ArrowUpRight,
   Filter,
-  Tag,
-  ChevronDown
+  Tag
 } from 'lucide-react';
 
 interface ClientsViewProps {
@@ -137,29 +136,19 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ clients, onOpenForm })
             />
           </div>
           
-          {/* Filter Dropdown */}
-          <div className="relative">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={16} />
-            <select
-              value={activeFilter}
-              onChange={(e) => setActiveFilter(e.target.value)}
-              className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-10 text-white appearance-none focus:bg-white/10 focus:border-white/30 outline-none transition-all cursor-pointer"
-            >
-              {filters.map(filter => (
-                <option key={filter} value={filter} className="bg-gray-900 text-white">
-                  {filter}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
-              <ChevronDown size={16} />
-            </div>
-          </div>
+          {/* Custom Filter Dropdown */}
+          <GlassDropdown 
+            options={filters}
+            value={activeFilter}
+            onChange={setActiveFilter}
+            icon={Filter}
+            className="w-full h-12"
+          />
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-          <div className="flex justify-between items-center px-2 pb-2 text-xs text-white/40">
+        <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+          <div className="flex justify-between items-center px-2 pb-1 text-xs text-white/40">
             <span>{filteredClients.length} Clients found</span>
             <span>{activeFilter}</span>
           </div>
@@ -171,26 +160,26 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ clients, onOpenForm })
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => setSelectedClient(client)}
+                className={`
+                  flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border
+                  ${selectedClient?.id === client.id 
+                    ? 'bg-white/10 border-emerald-500/30 shadow-lg' 
+                    : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10'}
+                `}
               >
-                <GlassCard 
-                  className={`p-4 cursor-pointer transition-all border-l-4 ${selectedClient?.id === client.id ? 'bg-white/10 border-l-emerald-400' : 'border-l-transparent hover:bg-white/5'}`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-medium border border-white/10 shrink-0">
-                      {client.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                         <h3 className="text-white font-medium truncate text-sm">{client.name}</h3>
-                         <span className="text-[10px] text-white/30 whitespace-nowrap ml-2">{client.location.split(',')[0]}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <StatusBadge status={client.status} />
-                      </div>
-                    </div>
-                    <ChevronRight size={16} className={`text-white/30 transition-transform shrink-0 ${selectedClient?.id === client.id ? 'rotate-90' : ''}`} />
-                  </div>
-                </GlassCard>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-xs font-medium border border-white/10 shrink-0">
+                  {client.avatar}
+                </div>
+                <div className="flex-1 min-w-0">
+                   <h3 className="text-sm font-medium text-white truncate">{client.name}</h3>
+                   <div className="flex items-center gap-1 text-xs text-white/40 truncate">
+                     <MapPin size={10} />
+                     <span>{client.location.split(',')[0]}</span>
+                   </div>
+                </div>
+                <div className="shrink-0 scale-90 origin-right">
+                   <StatusBadge status={client.status} />
+                </div>
               </motion.div>
             ))}
             {filteredClients.length === 0 && (
