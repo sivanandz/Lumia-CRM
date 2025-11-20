@@ -1,0 +1,7 @@
+{
+  "name": "Lumina Wealth CRM",
+  "description": "A liquid-glass styled CRM for Financial Advisors specializing in Indian Mutual Funds and Insurance. Features AI-powered insights, Google Drive/Calendar sync simulation, and deep reasoning capabilities.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
