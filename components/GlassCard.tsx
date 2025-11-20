@@ -23,7 +23,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       whileTap={onClick ? { scale: 0.98 } : {}}
       transition={{ duration: 0.3, ease: "easeOut" }}
       className={`
-        relative overflow-hidden
+        relative overflow-hidden isolate
         bg-white/10 
         backdrop-blur-xl 
         border border-white/20 
@@ -34,12 +34,11 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         ${className}
       `}
     >
-      {/* Shine/Reflection effect */}
-      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none opacity-50" />
+      {/* Shine/Reflection effect - z-[-1] ensures it sits behind content (static/block) but on top of background */}
+      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none opacity-50 -z-10" />
       
-      <div className="relative z-10">
-        {children}
-      </div>
+      {/* Content rendered directly to preserve flex/grid layout context from className */}
+      {children}
     </motion.div>
   );
 };

@@ -12,12 +12,14 @@ export interface ChatResponse {
  * Sends a message to Gemini with configurable modes.
  * @param prompt User input
  * @param history Chat history
- * @param mode 'thinking' for deep reasoning (Pro) or 'research' for web grounding (Flash)
+ * @param mode 'thinking' (Pro), 'research' (Search), or 'locate' (Maps)
+ * @param userLocation Optional lat/lng for maps context
  */
 export const sendChatQuery = async (
   prompt: string,
   history: { role: string; parts: { text: string }[] }[] = [],
-  mode: 'thinking' | 'research' = 'thinking'
+  mode: 'thinking' | 'research' | 'locate' = 'thinking',
+  userLocation?: { latitude: number; longitude: number }
 ): Promise<ChatResponse> => {
   try {
     const systemContext = `
@@ -49,6 +51,29 @@ export const sendChatQuery = async (
             thinkingBudget: 32768, // Max budget for deep reasoning
           },
         },
+      });
+    } else if (mode === 'locate') {
+      // Use Gemini 2.5 Flash with Google Maps Grounding
+      const config: any = {
+        tools: [{ googleMaps: {} }],
+      };
+
+      // Add location context if available
+      if (userLocation) {
+        config.toolConfig = {
+          retrievalConfig: {
+            latLng: {
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude
+            }
+          }
+        };
+      }
+
+      response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: contents,
+        config: config,
       });
     } else {
       // Use Gemini 2.5 Flash with Google Search Grounding

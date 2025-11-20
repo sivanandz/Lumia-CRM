@@ -6,8 +6,11 @@ import { ClientsView } from './components/ClientsView';
 import { AIChat } from './components/AIChat';
 import { ClientForm } from './components/ClientForm';
 import { GlassCard } from './components/GlassCard';
-import { Tab, Client } from './types';
-import { Search, Bell, Folder, FileText, Users, Calendar, UploadCloud, Sparkles, TrendingUp, ArrowRight, X } from 'lucide-react';
+import { CalendarView } from './components/CalendarView';
+import { FundsView } from './components/FundsView';
+import { InsuranceView } from './components/InsuranceView';
+import { Tab, Client, Task, InsurancePolicy } from './types';
+import { Search, Bell, Folder, FileText, Users, Calendar, UploadCloud, Sparkles, TrendingUp, ArrowRight, X, CheckSquare, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedWrapper } from './components/AnimatedWrapper';
 
@@ -95,17 +98,36 @@ const MOCK_FILES = [
 ];
 
 const MOCK_FUNDS = [
-  { id: 'mf1', name: 'HDFC Mid-Cap Opportunities', nav: 145.2, category: 'Equity' },
-  { id: 'mf2', name: 'SBI Bluechip Fund', nav: 88.5, category: 'Equity' },
-  { id: 'mf3', name: 'ICICI Prudential Balanced', nav: 42.1, category: 'Hybrid' },
-  { id: 'mf4', name: 'Axis Small Cap Fund', nav: 92.3, category: 'Equity' },
-  { id: 'mf5', name: 'Parag Parikh Flexi Cap', nav: 65.4, category: 'Equity' },
+  { id: 'mf1', name: 'HDFC Mid-Cap Opportunities', nav: 145.2, category: 'Equity', rating: 4, returns1Y: 28.5 },
+  { id: 'mf2', name: 'SBI Bluechip Fund', nav: 88.5, category: 'Equity', rating: 5, returns1Y: 15.2 },
+  { id: 'mf3', name: 'ICICI Prudential Balanced', nav: 42.1, category: 'Hybrid', rating: 4, returns1Y: 18.1 },
+  { id: 'mf4', name: 'Axis Small Cap Fund', nav: 92.3, category: 'Equity', rating: 5, returns1Y: 35.6 },
+  { id: 'mf5', name: 'Parag Parikh Flexi Cap', nav: 65.4, category: 'Equity', rating: 5, returns1Y: 22.3 },
+];
+
+const MOCK_INSURANCE: InsurancePolicy[] = [
+  { id: 'ins1', name: 'iSelect Star Term Plan', provider: 'Canara HSBC', type: 'Term', premium: 15000, cover: 10000000, features: ['Critical Illness', 'Accidental Death', 'Return of Premium'] },
+  { id: 'ins2', name: 'Optima Restore', provider: 'HDFC ERGO', type: 'Health', premium: 22000, cover: 500000, features: ['100% Restoration', 'No Claim Bonus', 'Cashless Network'] },
+  { id: 'ins3', name: 'Smart Wealth Plan', provider: 'Max Life', type: 'ULIP', premium: 100000, cover: 1000000, features: ['Market Linked Returns', 'Tax Benefits', 'Partial Withdrawal'] },
+  { id: 'ins4', name: 'LIC Jeevan Umang', provider: 'LIC', type: 'Endowment', premium: 45000, cover: 500000, features: ['Guaranteed Survival Benefit', 'Life Coverage', 'Loan Facility'] },
+];
+
+const MOCK_TASKS: Task[] = [
+  { id: 1, text: 'Send Tax Reports to Priya Singh', done: false, due: 'Today' },
+  { id: 2, text: 'Update KYC documents for new leads', done: true, due: 'Yesterday' },
+  { id: 3, text: 'Research new NFOs in Mid-cap segment', done: false, due: 'Tomorrow' },
+  { id: 4, text: 'Call insurance provider regarding claim #482', done: false, due: 'Fri' }
 ];
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.DASHBOARD);
   const [clients, setClients] = useState<Client[]>(MOCK_CLIENTS);
+  const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS);
+  
+  // Modals State
   const [isClientFormOpen, setIsClientFormOpen] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [quickTaskInput, setQuickTaskInput] = useState('');
   
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -124,7 +146,7 @@ function App() {
   }, []);
 
   const searchResults = useMemo(() => {
-    if (!searchQuery) return { clients: [], funds: [], files: [] };
+    if (!searchQuery) return { clients: [], funds: [], files: [], policies: [] };
     const lowerQuery = searchQuery.toLowerCase();
     
     return {
@@ -139,23 +161,50 @@ function App() {
       ),
       files: MOCK_FILES.filter(f => 
         f.name.toLowerCase().replace(/_/g, ' ').includes(lowerQuery)
+      ),
+      policies: MOCK_INSURANCE.filter(p => 
+        p.name.toLowerCase().includes(lowerQuery) ||
+        p.provider.toLowerCase().includes(lowerQuery)
       )
     };
   }, [searchQuery, clients]);
 
-  const hasResults = searchResults.clients.length > 0 || searchResults.funds.length > 0 || searchResults.files.length > 0;
+  const hasResults = searchResults.clients.length > 0 || searchResults.funds.length > 0 || searchResults.files.length > 0 || searchResults.policies.length > 0;
 
   const handleNewClient = (newClient: Client) => {
     setClients(prev => [newClient, ...prev]);
     setActiveTab(Tab.CLIENTS); 
   };
 
-  const handleSearchResultClick = (type: 'client' | 'fund' | 'file', id: string) => {
+  const handleToggleTask = (id: number) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  };
+
+  const handleAddTask = (text: string) => {
+    if (!text.trim()) return;
+    const newTask: Task = {
+      id: Date.now(),
+      text,
+      done: false,
+      due: 'Today'
+    };
+    setTasks(prev => [...prev, newTask]);
+  };
+
+  const handleQuickTaskSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleAddTask(quickTaskInput);
+    setQuickTaskInput('');
+    setIsTaskModalOpen(false);
+  };
+
+  const handleSearchResultClick = (type: 'client' | 'fund' | 'file' | 'policy', id: string) => {
     setSearchQuery('');
     setIsSearchFocused(false);
     if (type === 'client') setActiveTab(Tab.CLIENTS);
     if (type === 'fund') setActiveTab(Tab.FUNDS);
     if (type === 'file') setActiveTab(Tab.DRIVE);
+    if (type === 'policy') setActiveTab(Tab.INSURANCE);
   };
 
   const renderContent = () => {
@@ -171,10 +220,32 @@ function App() {
              />
           </div>
         );
+      case Tab.FUNDS:
+        return (
+          <div className="h-[calc(100vh-140px)] md:h-[calc(100vh-100px)]">
+             <FundsView funds={MOCK_FUNDS} />
+          </div>
+        );
+      case Tab.INSURANCE:
+        return (
+          <div className="h-[calc(100vh-140px)] md:h-[calc(100vh-100px)]">
+             <InsuranceView policies={MOCK_INSURANCE} />
+          </div>
+        );
       case Tab.AI_ADVISOR:
         return (
           <div className="h-[calc(100vh-140px)] md:h-[calc(100vh-100px)]">
             <AIChat />
+          </div>
+        );
+      case Tab.CALENDAR:
+        return (
+          <div className="h-[calc(100vh-140px)] md:h-[calc(100vh-100px)]">
+             <CalendarView 
+               tasks={tasks}
+               onToggleTask={handleToggleTask}
+               onAddTask={handleAddTask}
+             />
           </div>
         );
       case Tab.DRIVE:
@@ -320,6 +391,28 @@ function App() {
                         </div>
                       )}
 
+                      {/* Policies Section */}
+                      {searchResults.policies.length > 0 && (
+                        <div className="mb-2">
+                          <h4 className="px-3 py-2 text-xs font-semibold text-white/40 uppercase tracking-wider">Insurance</h4>
+                          {searchResults.policies.map(policy => (
+                            <div 
+                              key={policy.id}
+                              onClick={() => handleSearchResultClick('policy', policy.id)}
+                              className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 cursor-pointer group transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                                <Users size={14} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white group-hover:text-blue-300 transition-colors truncate">{policy.name}</p>
+                                <p className="text-xs text-white/40">{policy.provider} • {policy.type}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       {/* Files Section */}
                       {searchResults.files.length > 0 && (
                         <div>
@@ -409,16 +502,17 @@ function App() {
 
               <div className="w-px h-8 bg-white/10" />
 
+              {/* Create Task Button - Replaces Meeting */}
               <motion.button 
                 whileHover={{ scale: 1.1, y: -5 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => setActiveTab(Tab.CALENDAR)}
+                onClick={() => setIsTaskModalOpen(true)}
                 className="group flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all"
               >
                 <div className="p-2 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-colors group-hover:border-blue-400/50">
-                  <Calendar size={20} />
+                  <CheckSquare size={20} />
                 </div>
-                <span className="text-[10px] font-medium text-white/60 group-hover:text-white">Meeting</span>
+                <span className="text-[10px] font-medium text-white/60 group-hover:text-white">Task</span>
               </motion.button>
 
               <div className="w-px h-8 bg-white/10" />
@@ -459,6 +553,44 @@ function App() {
             onClose={() => setIsClientFormOpen(false)} 
             onSubmit={handleNewClient} 
           />
+        )}
+        {isTaskModalOpen && (
+           <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+           >
+              <GlassCard className="w-full max-w-md overflow-hidden">
+                 <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                       <CheckSquare className="text-blue-400" /> Create Task
+                    </h3>
+                    <button onClick={() => setIsTaskModalOpen(false)} className="hover:text-white text-white/50">
+                       <X size={20} />
+                    </button>
+                 </div>
+                 <form onSubmit={handleQuickTaskSubmit} className="p-6 space-y-4">
+                    <input 
+                       type="text"
+                       autoFocus
+                       value={quickTaskInput}
+                       onChange={(e) => setQuickTaskInput(e.target.value)}
+                       placeholder="What needs to be done?"
+                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500/50"
+                    />
+                    <div className="flex justify-end">
+                       <button 
+                          type="submit" 
+                          disabled={!quickTaskInput.trim()}
+                          className="px-6 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-medium transition-colors disabled:opacity-50"
+                       >
+                          Add Task
+                       </button>
+                    </div>
+                 </form>
+              </GlassCard>
+           </motion.div>
         )}
       </AnimatePresence>
 

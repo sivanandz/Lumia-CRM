@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, BrainCircuit, Loader2, Globe, ExternalLink, Mic } from 'lucide-react';
+import { Send, Sparkles, BrainCircuit, Loader2, Globe, ExternalLink, Mic, MapPin } from 'lucide-react';
 import { GlassCard } from './GlassCard';
 import { ChatMessage } from '../types';
 import { sendChatQuery } from '../services/geminiService';
@@ -10,13 +10,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const AIChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [mode, setMode] = useState<'thinking' | 'research'>('thinking');
+  const [mode, setMode] = useState<'thinking' | 'research' | 'locate'>('thinking');
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | undefined>(undefined);
+  
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       role: 'model',
-      text: 'Hello! I am your Lumina Advisor. \n\nSelect "Deep Think" for complex strategy brainstorming (Gemini 3 Pro) or "Market Research" for up-to-date web information (Gemini 2.5 Flash).',
+      text: 'Hello! I am your Lumina Advisor. \n\nSelect a mode below:\n• **Deep Think** (Gemini 3 Pro) for complex strategies.\n• **Market Research** (Search) for latest news.\n• **Locate** (Maps) for finding nearby branches or services.',
       timestamp: new Date()
     }
   ]);
@@ -29,6 +31,21 @@ export const AIChat: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    // Get user location for Maps Grounding
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        (error) => console.error("Error getting location:", error)
+      );
+    }
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -51,7 +68,7 @@ export const AIChat: React.FC = () => {
         parts: [{ text: m.text }]
       }));
 
-      const { text, groundingMetadata } = await sendChatQuery(userMsg.text, history, mode);
+      const { text, groundingMetadata } = await sendChatQuery(userMsg.text, history, mode, userLocation);
 
       const modelMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -76,6 +93,22 @@ export const AIChat: React.FC = () => {
     }
   };
 
+  const getModeIcon = () => {
+    switch (mode) {
+      case 'thinking': return <BrainCircuit className="text-white w-6 h-6" />;
+      case 'research': return <Globe className="text-white w-6 h-6" />;
+      case 'locate': return <MapPin className="text-white w-6 h-6" />;
+    }
+  };
+
+  const getModeColor = () => {
+    switch (mode) {
+      case 'thinking': return 'from-pink-500 to-violet-600 shadow-pink-500/20';
+      case 'research': return 'from-blue-500 to-cyan-600 shadow-blue-500/20';
+      case 'locate': return 'from-emerald-500 to-teal-600 shadow-emerald-500/20';
+    }
+  };
+
   return (
     <AnimatedWrapper className="h-full">
       <GlassCard className="flex flex-col h-full p-0 overflow-hidden bg-black/20">
@@ -86,15 +119,15 @@ export const AIChat: React.FC = () => {
               key={mode}
               initial={{ rotateY: 90 }}
               animate={{ rotateY: 0 }}
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-colors ${mode === 'thinking' ? 'bg-gradient-to-br from-pink-500 to-violet-600 shadow-pink-500/20' : 'bg-gradient-to-br from-blue-500 to-cyan-600 shadow-blue-500/20'}`}
+              className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-colors bg-gradient-to-br ${getModeColor()}`}
             >
-              {mode === 'thinking' ? <BrainCircuit className="text-white w-6 h-6" /> : <Globe className="text-white w-6 h-6" />}
+              {getModeIcon()}
             </motion.div>
             <div>
               <h2 className="text-lg font-semibold text-white">Lumina Brain</h2>
               <p className="text-xs text-white/50 flex items-center gap-1">
                 <Sparkles size={10} className={mode === 'thinking' ? "text-amber-300" : "text-cyan-300"} />
-                {mode === 'thinking' ? 'Gemini 3 Pro • Thinking Mode' : 'Gemini 2.5 Flash • Live Search'}
+                {mode === 'thinking' ? 'Gemini 3 Pro • Thinking' : mode === 'locate' ? 'Gemini 2.5 Flash • Maps' : 'Gemini 2.5 Flash • Search'}
               </p>
             </div>
           </div>
@@ -116,15 +149,21 @@ export const AIChat: React.FC = () => {
         <div className="flex p-2 bg-black/20 gap-2">
           <button
             onClick={() => setMode('thinking')}
-            className={`flex-1 py-2 text-xs font-medium rounded-xl transition-all ${mode === 'thinking' ? 'bg-white/10 text-white border border-white/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            className={`flex-1 py-2 text-xs font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${mode === 'thinking' ? 'bg-white/10 text-white border border-white/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
-            Deep Think
+            <BrainCircuit size={14} /> Deep Think
           </button>
           <button
             onClick={() => setMode('research')}
-            className={`flex-1 py-2 text-xs font-medium rounded-xl transition-all ${mode === 'research' ? 'bg-white/10 text-white border border-white/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+            className={`flex-1 py-2 text-xs font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${mode === 'research' ? 'bg-white/10 text-white border border-white/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
           >
-            Market Research
+            <Globe size={14} /> Research
+          </button>
+          <button
+            onClick={() => setMode('locate')}
+            className={`flex-1 py-2 text-xs font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${mode === 'locate' ? 'bg-white/10 text-white border border-white/20' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+          >
+            <MapPin size={14} /> Locate
           </button>
         </div>
 
@@ -164,9 +203,23 @@ export const AIChat: React.FC = () => {
                               className="flex items-center gap-1 px-2 py-1 rounded-md bg-black/20 hover:bg-white/10 border border-white/10 text-xs text-blue-300 hover:text-blue-200 transition-colors"
                             >
                               <ExternalLink size={10} />
-                              <span className="max-w-[150px] truncate">{chunk.web.title || 'Source'}</span>
+                              <span className="max-w-[150px] truncate">{chunk.web.title || 'Web Source'}</span>
                             </a>
                           );
+                        }
+                        if (chunk.maps?.uri) {
+                            return (
+                                <a 
+                                key={idx}
+                                href={chunk.maps.uri} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 px-2 py-1 rounded-md bg-black/20 hover:bg-white/10 border border-white/10 text-xs text-emerald-300 hover:text-emerald-200 transition-colors"
+                              >
+                                <MapPin size={10} />
+                                <span className="max-w-[150px] truncate">{chunk.maps.title || 'Map Location'}</span>
+                              </a>
+                            )
                         }
                         return null;
                       })}
@@ -189,9 +242,9 @@ export const AIChat: React.FC = () => {
               className="flex justify-start"
             >
                <div className="bg-white/5 p-4 rounded-2xl rounded-tl-none border border-white/10 flex items-center gap-3">
-                  <Loader2 className={`w-5 h-5 animate-spin ${mode === 'thinking' ? 'text-pink-400' : 'text-cyan-400'}`} />
+                  <Loader2 className={`w-5 h-5 animate-spin ${mode === 'thinking' ? 'text-pink-400' : mode === 'locate' ? 'text-emerald-400' : 'text-cyan-400'}`} />
                   <span className="text-sm text-white/60 animate-pulse">
-                    {mode === 'thinking' ? 'Thinking deeply about market conditions...' : 'Searching global indices...'}
+                    {mode === 'thinking' ? 'Thinking deeply...' : mode === 'locate' ? 'Locating nearby...' : 'Searching...'}
                   </span>
                </div>
             </motion.div>
@@ -206,7 +259,7 @@ export const AIChat: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder={mode === 'thinking' ? "Ask complex questions requiring deep reasoning..." : "Search for latest NAV, news, or market trends..."}
+              placeholder={mode === 'thinking' ? "Ask complex questions..." : mode === 'locate' ? "Find nearby banks, advisors..." : "Search web..."}
               className="w-full bg-transparent text-white placeholder-white/40 px-4 py-4 outline-none resize-none h-[60px]"
             />
             <motion.button 
@@ -220,7 +273,7 @@ export const AIChat: React.FC = () => {
             </motion.button>
           </div>
           <p className="text-[10px] text-white/30 text-center mt-2">
-            {mode === 'thinking' ? 'Using Thinking Budget: 32k tokens' : 'Using Google Search Grounding'}
+            {mode === 'thinking' ? 'Gemini 3 Pro • 32k Context' : mode === 'locate' ? 'Gemini 2.5 Flash • Google Maps' : 'Gemini 2.5 Flash • Google Search'}
           </p>
         </div>
       </GlassCard>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GlassCard } from './GlassCard';
 import { Client } from '../types';
@@ -14,7 +15,6 @@ import {
   Shield, 
   MoreHorizontal, 
   Plus,
-  ChevronRight,
   Clock,
   ArrowUpRight,
   Filter,
@@ -147,7 +147,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ clients, onOpenForm })
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto pr-2 space-y-2 custom-scrollbar pb-24">
           <div className="flex justify-between items-center px-2 pb-1 text-xs text-white/40">
             <span>{filteredClients.length} Clients found</span>
             <span>{activeFilter}</span>
@@ -202,152 +202,154 @@ export const ClientsView: React.FC<ClientsViewProps> = ({ clients, onOpenForm })
               exit={{ opacity: 0, scale: 0.95 }}
               className="h-full"
             >
-              <GlassCard className="h-full flex flex-col p-0 overflow-hidden">
-                
-                {/* Header Banner */}
-                <div className="relative h-32 bg-gradient-to-r from-emerald-900/50 to-cyan-900/50 shrink-0">
-                  <div className="absolute -bottom-10 left-8 flex items-end gap-6">
-                    <motion.div 
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-400 p-0.5 shadow-xl shrink-0"
-                    >
-                      <div className="w-full h-full bg-black/40 backdrop-blur-md rounded-[14px] flex items-center justify-center">
-                        <span className="text-3xl font-bold text-white">{selectedClient.avatar}</span>
-                      </div>
-                    </motion.div>
-                    <div className="mb-2">
-                      <h1 className="text-2xl font-bold text-white">{selectedClient.name}</h1>
-                      <div className="flex items-center gap-2 text-white/60 text-sm">
-                        <MapPin size={14} /> {selectedClient.location}
+              <GlassCard className="h-full p-0 overflow-hidden">
+                <div className="h-full overflow-y-auto custom-scrollbar">
+                  
+                  {/* Header Banner - Now part of scroll flow */}
+                  <div className="relative h-32 bg-gradient-to-r from-emerald-900/50 to-cyan-900/50">
+                    <div className="absolute -bottom-10 left-8 flex items-end gap-6">
+                      <motion.div 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-400 p-0.5 shadow-xl shrink-0"
+                      >
+                        <div className="w-full h-full bg-black/40 backdrop-blur-md rounded-[14px] flex items-center justify-center">
+                          <span className="text-3xl font-bold text-white">{selectedClient.avatar}</span>
+                        </div>
+                      </motion.div>
+                      <div className="mb-2">
+                        <h1 className="text-2xl font-bold text-white">{selectedClient.name}</h1>
+                        <div className="flex items-center gap-2 text-white/60 text-sm">
+                          <MapPin size={14} /> {selectedClient.location}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Top Actions */}
-                  <div className="absolute top-6 right-6 flex gap-3">
-                    <button className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium backdrop-blur-md transition-all border border-white/10">
-                      Log Meeting
-                    </button>
-                    <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all border border-white/10">
-                      <MoreHorizontal size={20} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Content Scroll */}
-                <div className="flex-1 overflow-y-auto pt-14 px-8 pb-8 space-y-8 custom-scrollbar">
-                  
-                  {/* Tags Section */}
-                  {selectedClient.tags && selectedClient.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {selectedClient.tags.map((tag, i) => (
-                        <motion.span 
-                          key={i}
-                          initial={{ opacity: 0, scale: 0 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.1 + (i * 0.05) }}
-                          className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-200 border border-amber-500/20 text-xs font-medium flex items-center gap-1"
-                        >
-                          <Tag size={10} /> {tag}
-                        </motion.span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Key Metrics Grid */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <GlassCard className="p-4 bg-emerald-500/5 border-emerald-500/10" hoverEffect>
-                      <div className="flex items-center gap-2 text-emerald-300 mb-1">
-                        <TrendingUp size={16} />
-                        <span className="text-xs font-medium uppercase tracking-wider">Total AUM</span>
-                      </div>
-                      <p className="text-2xl font-bold text-white">₹{(selectedClient.aum / 100000).toFixed(1)} L</p>
-                    </GlassCard>
                     
-                    <GlassCard className="p-4 bg-blue-500/5 border-blue-500/10" hoverEffect>
-                      <div className="flex items-center gap-2 text-blue-300 mb-1">
-                        <Shield size={16} />
-                        <span className="text-xs font-medium uppercase tracking-wider">Risk Profile</span>
-                      </div>
-                      <p className="text-xl font-bold text-white">{selectedClient.riskProfile}</p>
-                    </GlassCard>
-
-                    <motion.button 
-                      whileHover={{ scale: 1.02 }}
-                      onClick={() => setActiveFilter(selectedClient.status)}
-                      className={`p-4 rounded-3xl border flex flex-col justify-center transition-all cursor-pointer
-                        ${selectedClient.status === 'Active' ? 'bg-emerald-500/10 border-emerald-500/20' : 
-                          selectedClient.status === 'Onboarding' ? 'bg-blue-500/10 border-blue-500/20' : 'bg-amber-500/10 border-amber-500/20'}
-                      `}
-                    >
-                      <div className={`flex items-center gap-2 mb-1 ${selectedClient.status === 'Active' ? 'text-emerald-300' : selectedClient.status === 'Onboarding' ? 'text-blue-300' : 'text-amber-300'}`}>
-                        <Shield size={16} />
-                        <span className="text-xs font-medium uppercase tracking-wider">Status</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xl font-bold text-white">{selectedClient.status}</p>
-                        <div className="scale-75 origin-left">
-                           <StatusBadge status={selectedClient.status} />
-                        </div>
-                      </div>
-                    </motion.button>
-                  </div>
-
-                  {/* Contact Information */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <a href={`mailto:${selectedClient.email}`} className="block">
-                      <GlassCard className="p-4 flex items-center gap-4" hoverEffect>
-                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/70 shrink-0">
-                          <Mail size={20} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs text-white/40 uppercase tracking-wider">Email Address</p>
-                          <p className="text-white truncate">{selectedClient.email}</p>
-                        </div>
-                      </GlassCard>
-                    </a>
-                    <a href={`tel:${selectedClient.phone}`} className="block">
-                      <GlassCard className="p-4 flex items-center gap-4" hoverEffect>
-                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/70 shrink-0">
-                          <Phone size={20} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs text-white/40 uppercase tracking-wider">Phone Number</p>
-                          <p className="text-white truncate">{selectedClient.phone}</p>
-                        </div>
-                      </GlassCard>
-                    </a>
-                  </div>
-
-                  {/* Timeline / History */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <Clock size={20} className="text-emerald-400" /> Recent Activity
-                    </h3>
-                    <div className="relative pl-4 border-l border-white/10 space-y-8">
-                      {selectedClient.history && selectedClient.history.length > 0 ? (
-                        selectedClient.history.map((item, i) => (
-                          <div key={item.id} className="relative">
-                            <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-black" />
-                            <GlassCard className="p-4 ml-4 bg-white/5">
-                              <div className="flex justify-between items-start mb-1">
-                                <div className="flex items-center gap-2">
-                                  {getHistoryIcon(item.type)}
-                                  <span className="text-white font-medium">{item.title}</span>
-                                </div>
-                                <span className="text-xs text-white/40">{item.date}</span>
-                              </div>
-                              <p className="text-sm text-white/60">{item.description}</p>
-                            </GlassCard>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-white/30 text-sm italic ml-4">No recent history available.</div>
-                      )}
+                    {/* Top Actions */}
+                    <div className="absolute top-6 right-6 flex gap-3">
+                      <button className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium backdrop-blur-md transition-all border border-white/10">
+                        Log Meeting
+                      </button>
+                      <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all border border-white/10">
+                        <MoreHorizontal size={20} />
+                      </button>
                     </div>
                   </div>
 
+                  {/* Content Wrapper */}
+                  <div className="px-8 pt-14 pb-40 space-y-8">
+                    
+                    {/* Tags Section */}
+                    {selectedClient.tags && selectedClient.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClient.tags.map((tag, i) => (
+                          <motion.span 
+                            key={i}
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.1 + (i * 0.05) }}
+                            className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-200 border border-amber-500/20 text-xs font-medium flex items-center gap-1"
+                          >
+                            <Tag size={10} /> {tag}
+                          </motion.span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Key Metrics Grid */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <GlassCard className="p-4 bg-emerald-500/5 border-emerald-500/10" hoverEffect>
+                        <div className="flex items-center gap-2 text-emerald-300 mb-1">
+                          <TrendingUp size={16} />
+                          <span className="text-xs font-medium uppercase tracking-wider">Total AUM</span>
+                        </div>
+                        <p className="text-2xl font-bold text-white">₹{(selectedClient.aum / 100000).toFixed(1)} L</p>
+                      </GlassCard>
+                      
+                      <GlassCard className="p-4 bg-blue-500/5 border-blue-500/10" hoverEffect>
+                        <div className="flex items-center gap-2 text-blue-300 mb-1">
+                          <Shield size={16} />
+                          <span className="text-xs font-medium uppercase tracking-wider">Risk Profile</span>
+                        </div>
+                        <p className="text-xl font-bold text-white">{selectedClient.riskProfile}</p>
+                      </GlassCard>
+
+                      <motion.button 
+                        whileHover={{ scale: 1.02 }}
+                        onClick={() => setActiveFilter(selectedClient.status)}
+                        className={`p-4 rounded-3xl border flex flex-col justify-center transition-all cursor-pointer
+                          ${selectedClient.status === 'Active' ? 'bg-emerald-500/10 border-emerald-500/20' : 
+                            selectedClient.status === 'Onboarding' ? 'bg-blue-500/10 border-blue-500/20' : 'bg-amber-500/10 border-amber-500/20'}
+                        `}
+                      >
+                        <div className={`flex items-center gap-2 mb-1 ${selectedClient.status === 'Active' ? 'text-emerald-300' : selectedClient.status === 'Onboarding' ? 'text-blue-300' : 'text-amber-300'}`}>
+                          <Shield size={16} />
+                          <span className="text-xs font-medium uppercase tracking-wider">Status</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xl font-bold text-white">{selectedClient.status}</p>
+                          <div className="scale-75 origin-left">
+                             <StatusBadge status={selectedClient.status} />
+                          </div>
+                        </div>
+                      </motion.button>
+                    </div>
+
+                    {/* Contact Information */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <a href={`mailto:${selectedClient.email}`} className="block">
+                        <GlassCard className="p-4 flex items-center gap-4" hoverEffect>
+                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/70 shrink-0">
+                            <Mail size={20} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-white/40 uppercase tracking-wider">Email Address</p>
+                            <p className="text-white truncate">{selectedClient.email}</p>
+                          </div>
+                        </GlassCard>
+                      </a>
+                      <a href={`tel:${selectedClient.phone}`} className="block">
+                        <GlassCard className="p-4 flex items-center gap-4" hoverEffect>
+                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/70 shrink-0">
+                            <Phone size={20} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-white/40 uppercase tracking-wider">Phone Number</p>
+                            <p className="text-white truncate">{selectedClient.phone}</p>
+                          </div>
+                        </GlassCard>
+                      </a>
+                    </div>
+
+                    {/* Timeline / History */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Clock size={20} className="text-emerald-400" /> Recent Activity
+                      </h3>
+                      <div className="relative pl-4 border-l border-white/10 space-y-8">
+                        {selectedClient.history && selectedClient.history.length > 0 ? (
+                          selectedClient.history.map((item, i) => (
+                            <div key={item.id} className="relative">
+                              <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-black" />
+                              <GlassCard className="p-4 ml-4 bg-white/5">
+                                <div className="flex justify-between items-start mb-1">
+                                  <div className="flex items-center gap-2">
+                                    {getHistoryIcon(item.type)}
+                                    <span className="text-white font-medium">{item.title}</span>
+                                  </div>
+                                  <span className="text-xs text-white/40">{item.date}</span>
+                                </div>
+                                <p className="text-sm text-white/60">{item.description}</p>
+                              </GlassCard>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-white/30 text-sm italic ml-4">No recent history available.</div>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
               </GlassCard>
             </motion.div>

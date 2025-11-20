@@ -36,15 +36,29 @@ export interface Client {
 
 export interface MutualFund {
   id: string;
-  schemeName: string;
+  name: string; // Changed from schemeName to name to match MOCK_DATA in App.tsx
   category: string;
   nav: number;
-  returns1Y: number;
-  rating: number;
+  returns1Y?: number;
+  rating?: number;
+}
+
+export interface InsurancePolicy {
+  id: string;
+  name: string;
+  provider: string;
+  type: 'Term' | 'Health' | 'ULIP' | 'Endowment';
+  premium: number;
+  cover: number;
+  features: string[];
 }
 
 export interface GroundingChunk {
   web?: {
+    uri: string;
+    title: string;
+  };
+  maps?: {
     uri: string;
     title: string;
   };
@@ -67,4 +81,11 @@ export interface DriveFile {
   type: 'folder' | 'pdf' | 'sheet' | 'doc';
   lastModified: string;
   size?: string;
+}
+
+export interface Task {
+  id: number;
+  text: string;
+  done: boolean;
+  due: string;
 }
